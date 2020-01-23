@@ -17,6 +17,7 @@ import {
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/bad-request.filter';
 import { QueryFailedFilter } from './filters/query-failed.filter';
+import { ResultInterceptor } from './interceptors/result.interceptor';
 import { ConfigService } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
 import { setupSwagger } from './viveo-swagger';
@@ -47,7 +48,10 @@ async function bootstrap() {
         new QueryFailedFilter(reflector),
     );
 
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
+    app.useGlobalInterceptors(
+        new ClassSerializerInterceptor(reflector),
+        new ResultInterceptor(),
+    );
 
     app.useGlobalPipes(
         new ValidationPipe({
