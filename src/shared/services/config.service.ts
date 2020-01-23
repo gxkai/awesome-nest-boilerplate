@@ -1,5 +1,5 @@
-import * as dotenv from 'dotenv';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import * as dotenv from 'dotenv';
 
 import { IAwsConfig } from '../../interfaces/IAwsConfig';
 import { SnakeNamingStrategy } from '../../snake-naming.strategy';
@@ -61,12 +61,12 @@ export class ConfigService {
             entities,
             migrations,
             keepConnectionAlive: true,
-            type: 'postgres',
-            host: this.get('POSTGRES_HOST'),
-            port: this.getNumber('POSTGRES_PORT'),
-            username: this.get('POSTGRES_USERNAME'),
-            password: this.get('POSTGRES_PASSWORD'),
-            database: this.get('POSTGRES_DATABASE'),
+            type: 'mysql',
+            host: this.get('MYSQL_HOST'),
+            port: this.getNumber('MYSQL_PORT'),
+            username: this.get('MYSQL_USERNAME'),
+            password: this.get('MYSQL_PASSWORD'),
+            database: this.get('MYSQL_DATABASE'),
             migrationsRun: true,
             logging: this.nodeEnv === 'development',
             namingStrategy: new SnakeNamingStrategy(),
