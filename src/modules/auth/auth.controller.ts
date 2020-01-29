@@ -4,6 +4,7 @@ import {
     Get,
     HttpCode,
     HttpStatus,
+    Inject,
     Post,
     UploadedFile,
     UseGuards,
@@ -16,6 +17,7 @@ import {
     ApiOkResponse,
     ApiUseTags,
 } from '@nestjs/swagger';
+import { Logger } from 'winston';
 
 import { AuthUser } from '../../decorators/auth-user.decorator';
 import { AuthGuard } from '../../guards/auth.guard';
@@ -35,6 +37,7 @@ export class AuthController {
     constructor(
         public readonly userService: UserService,
         public readonly authService: AuthService,
+        @Inject('winston') private readonly _logger: Logger,
     ) {}
 
     @Post('login')

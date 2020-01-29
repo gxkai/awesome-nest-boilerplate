@@ -8,7 +8,8 @@ import {
 import * as compression from 'compression';
 import * as RateLimit from 'express-rate-limit';
 import * as helmet from 'helmet';
-import * as morgan from 'morgan';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+// import * as morgan from 'morgan';
 import {
     initializeTransactionalContext,
     patchTypeORMRepositoryWithBaseRepository,
@@ -30,6 +31,7 @@ async function bootstrap() {
         new ExpressAdapter(),
         { cors: true },
     );
+    app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
     app.enable('trust proxy'); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
     app.use(helmet());
     app.use(
@@ -39,7 +41,7 @@ async function bootstrap() {
         }),
     );
     app.use(compression());
-    app.use(morgan('combined'));
+    // app.use(morgan('combined'));
 
     const reflector = app.get(Reflector);
 
@@ -65,6 +67,7 @@ async function bootstrap() {
     );
 
     const configService = app.select(SharedModule).get(ConfigService);
+    app.setGlobalPrefix(configService.get('PREFIX'));
 
     app.connectMicroservice({
         transport: Transport.TCP,

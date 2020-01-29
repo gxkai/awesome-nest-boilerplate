@@ -14,9 +14,7 @@ module.exports = {
     },
     env_production: {
       NODE_ENV: 'production'
-    },
-    error_file: './logs/err.log',
-    out_file: './out'
+    }
   }],
 
   deploy : {

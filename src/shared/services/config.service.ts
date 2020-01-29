@@ -1,14 +1,18 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
+import {
+    utilities as nestWinstonModuleUtilities,
+    WinstonModuleOptions,
+} from 'nest-winston';
+import * as winston from 'winston';
 
 import { IAwsConfig } from '../../interfaces/IAwsConfig';
 import { SnakeNamingStrategy } from '../../snake-naming.strategy';
 
 export class ConfigService {
     constructor() {
-        const nodeEnv = this.nodeEnv;
         dotenv.config({
-            path: `.${nodeEnv}.env`,
+            path: '.env',
         });
 
         // Replace \\n with \n to support multiline strings in AWS
@@ -78,6 +82,27 @@ export class ConfigService {
             accessKeyId: this.get('AWS_S3_ACCESS_KEY_ID'),
             secretAccessKey: this.get('AWS_S3_SECRET_ACCESS_KEY'),
             bucketName: this.get('S3_BUCKET_NAME'),
+        };
+    }
+
+    get winstonConfig(): WinstonModuleOptions {
+        return {
+            format: winston.format.combine(
+                winston.format.timestamp(),
+                nestWinstonModuleUtilities.format.nestLike(),
+            ),
+            transports: [
+                new winston.transports.Console({}),
+                new winston.transports.DailyRotateFile({
+                    filename: './logs/' + this.nodeEnv + '/%DATE%.log',
+                    level: 'info',
+                    datePattern: 'YYYY-MM-DD',
+                    zippedArchive: true,
+                    maxSize: '100m',
+                    maxFiles: '14d',
+                }),
+                //         // other transports...
+            ],
         };
     }
 }

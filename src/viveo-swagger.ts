@@ -2,12 +2,17 @@ import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export function setupSwagger(app: INestApplication) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const version = require('../package.json').version || '';
     const options = new DocumentBuilder()
         .setTitle('API')
-        .setVersion('0.0.1')
+        .setVersion(version)
         .addBearerAuth()
+        .setBasePath(process.env.PREFIX)
+        .setSchemes('http')
+        .addBearerAuth('Bearer', 'header')
         .build();
 
     const document = SwaggerModule.createDocument(app, options);
-    SwaggerModule.setup('documentation', app, document);
+    SwaggerModule.setup('docs', app, document);
 }
