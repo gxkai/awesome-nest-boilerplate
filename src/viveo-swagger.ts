@@ -10,7 +10,7 @@ export function setupSwagger(app: INestApplication) {
         .addBearerAuth()
         .setBasePath(process.env.PREFIX)
         .setSchemes('http')
-        .addBearerAuth('Bearer', 'header')
+        .addBearerAuth('Authorization', 'header')
         .build();
 
     const document = SwaggerModule.createDocument(app, options);

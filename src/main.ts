@@ -1,4 +1,8 @@
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import {
+    ClassSerializerInterceptor,
+    Logger,
+    ValidationPipe,
+} from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import {
@@ -8,8 +12,8 @@ import {
 import * as compression from 'compression';
 import * as RateLimit from 'express-rate-limit';
 import * as helmet from 'helmet';
+import * as morgan from 'morgan';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-// import * as morgan from 'morgan';
 import {
     initializeTransactionalContext,
     patchTypeORMRepositoryWithBaseRepository,
@@ -18,6 +22,7 @@ import {
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/bad-request.filter';
 import { QueryFailedFilter } from './filters/query-failed.filter';
+import { LogInterceptor } from './interceptors/log.interceptor';
 import { ResultInterceptor } from './interceptors/result.interceptor';
 import { ConfigService } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
@@ -41,7 +46,6 @@ async function bootstrap() {
         }),
     );
     app.use(compression());
-    // app.use(morgan('combined'));
 
     const reflector = app.get(Reflector);
 
@@ -49,10 +53,16 @@ async function bootstrap() {
         new HttpExceptionFilter(reflector),
         new QueryFailedFilter(reflector),
     );
-
+    const logger = new Logger();
+    app.use(
+        morgan('combined', {
+            stream: { write: message => logger.log(message) },
+        }),
+    );
     app.useGlobalInterceptors(
         new ClassSerializerInterceptor(reflector),
         new ResultInterceptor(),
+        new LogInterceptor(logger),
     );
 
     app.useGlobalPipes(
@@ -87,7 +97,7 @@ async function bootstrap() {
     const port = configService.getNumber('PORT');
     await app.listen(port);
 
-    console.info(`server running on port ${port}`);
+    logger.log(`server running on port ${port}`);
 }
 
 bootstrap();

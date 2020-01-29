@@ -52,6 +52,7 @@ export class AuthController {
         const userEntity = await this.authService.validateUser(userLoginDto);
 
         const token = await this.authService.createToken(userEntity);
+        this._logger.info(JSON.stringify(token));
         return new LoginPayloadDto(userEntity.toDto(), token);
     }
 
