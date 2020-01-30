@@ -22,7 +22,6 @@ import {
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/bad-request.filter';
 import { QueryFailedFilter } from './filters/query-failed.filter';
-import { LogInterceptor } from './interceptors/log.interceptor';
 import { ResultInterceptor } from './interceptors/result.interceptor';
 import { ConfigService } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
@@ -56,13 +55,19 @@ async function bootstrap() {
     const logger = new Logger();
     app.use(
         morgan('combined', {
+            skip: (req, res) => res.statusCode < 400,
+            stream: { write: message => logger.error(message) },
+        }),
+    );
+    app.use(
+        morgan('combined', {
+            skip: (req, res) => res.statusCode >= 400,
             stream: { write: message => logger.log(message) },
         }),
     );
     app.useGlobalInterceptors(
         new ClassSerializerInterceptor(reflector),
         new ResultInterceptor(),
-        new LogInterceptor(logger),
     );
 
     app.useGlobalPipes(
